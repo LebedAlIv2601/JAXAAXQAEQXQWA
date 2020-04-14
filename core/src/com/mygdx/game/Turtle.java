@@ -8,10 +8,9 @@ public class Turtle extends BaseActor{
     public Turtle(float x, float y, Stage s){
         super(x, y, s);
 
-//        loadTexture("Staing.png");
         String[] fileNames = {"Staing.png", "1going.png", "2going.png", "3going.png", "4going.png", "5going.png"};
 
-        loadAnimationFromFiles(fileNames, 0.1f, true);
+        loadAnimationFromFiles(fileNames, 0.08f, true);
 
         setAcceleration(400);
         setMaxSpeed(100);
@@ -22,10 +21,10 @@ public class Turtle extends BaseActor{
     public void act(float dt) {
         super.act(dt);
 
-        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
+        if(Gdx.input.isKeyPressed(Input.Keys.LEFT) || (Gdx.input.isTouched() && Gdx.input.getX()<400)){
             accelerateAtAngle(180);
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
+        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)|| (Gdx.input.isTouched() && Gdx.input.getX()>400)){
             accelerateAtAngle(0);
         }
         if(Gdx.input.isKeyPressed(Input.Keys.UP)){
@@ -37,11 +36,11 @@ public class Turtle extends BaseActor{
 
         applyPhysics(dt);
 
-        setAnimationPaused(!isMoving());
+//        setAnimationPaused(!isMoving());
 
-        if(getSpeed() > 0){
-            setRotation(getMotionAngle());
-        }
+//        if(getSpeed() > 0){
+//            setRotation(getMotionAngle());
+//        }
         boundToWorld();
         alignCamera();
     }
