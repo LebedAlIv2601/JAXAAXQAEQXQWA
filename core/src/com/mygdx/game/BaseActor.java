@@ -13,13 +13,14 @@ import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import java.util.ArrayList;
 
-public class BaseActor extends Actor {
+public class BaseActor extends Group {
     private Animation<TextureRegion> animation;
     private float elapsedTime;
     private boolean animationPaused;
@@ -72,36 +73,37 @@ public class BaseActor extends Actor {
     }
 
     public void draw(Batch batch, float parentAlpha){
-        super.draw(batch, parentAlpha);
+
 
         Color c = getColor();
         batch.setColor(c.r,c.g,c.b,c.a);
         if(animation != null && isVisible()){
             batch.draw(animation.getKeyFrame(elapsedTime), getX(), getY(), getOriginX(), getOriginY(), getWidth(), getHeight(), getScaleX(), getScaleY(), getRotation());
         }
+        super.draw(batch, parentAlpha);
     }
 
     public Animation<TextureRegion> loadAnimationFromFiles(String[] fileNames, float frameDuration, boolean loop){
-            int fileCount = fileNames.length;
-            Array<TextureRegion> textureArray = new Array<TextureRegion>();
+        int fileCount = fileNames.length;
+        Array<TextureRegion> textureArray = new Array<TextureRegion>();
 
-            for(int i = 0; i< fileCount; i++){
-                String fileName = fileNames[i];
-                Texture texture = new Texture(Gdx.files.internal(fileName));
-                texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-                textureArray.add(new TextureRegion(texture));
-            }
-            Animation<TextureRegion> anim = new Animation<TextureRegion>(frameDuration, textureArray);
-            if(loop){
-                anim.setPlayMode(Animation.PlayMode.LOOP);
-            } else {
-                anim.setPlayMode(Animation.PlayMode.NORMAL);
-            }
+        for(int i = 0; i< fileCount; i++){
+            String fileName = fileNames[i];
+            Texture texture = new Texture(Gdx.files.internal(fileName));
+            texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+            textureArray.add(new TextureRegion(texture));
+        }
+        Animation<TextureRegion> anim = new Animation<TextureRegion>(frameDuration, textureArray);
+        if(loop){
+            anim.setPlayMode(Animation.PlayMode.LOOP);
+        } else {
+            anim.setPlayMode(Animation.PlayMode.NORMAL);
+        }
 
-            if(animation == null){
-                setAnimation(anim);
-            }
-            return anim;
+        if(animation == null){
+            setAnimation(anim);
+        }
+        return anim;
     }
 
     public Animation<TextureRegion> loadAnimationFromSheet(String fileName, int rows, int cols, float frameDuration, boolean loop){
@@ -224,11 +226,11 @@ public class BaseActor extends Actor {
     }
 
     public Polygon getBoundaryPolygon(){
-            boundaryPolygon.setPosition(getX(), getY());
-            boundaryPolygon.setOrigin(getOriginX(), getOriginY());
-            boundaryPolygon.setRotation(getRotation());
-            boundaryPolygon.setScale(getScaleX(), getScaleY());
-            return boundaryPolygon;
+        boundaryPolygon.setPosition(getX(), getY());
+        boundaryPolygon.setOrigin(getOriginX(), getOriginY());
+        boundaryPolygon.setRotation(getRotation());
+        boundaryPolygon.setScale(getScaleX(), getScaleY());
+        return boundaryPolygon;
     }
 
     public boolean overlaps(BaseActor other){
@@ -320,5 +322,35 @@ public class BaseActor extends Actor {
         cam.position.x = MathUtils.clamp(cam.position.x, cam.viewportWidth/2, worldBounds.width-cam.viewportWidth/2);
         cam.position.y = MathUtils.clamp(cam.position.y, cam.viewportHeight/2, worldBounds.height-cam.viewportHeight/2);
         cam.update();
+    }
+
+    public void wrapAroundWorld(){
+        if(getX() + getWidth()<0){
+            setX(worldBounds.width);
+        }
+        if(getX() >worldBounds.width){
+            setX(-getWidth());
+        }
+        if(getY()+getHeight()<0){
+            setY(worldBounds.height);
+        }
+        if(getY()>worldBounds.height){
+            setY(-getHeight());
+        }
+    }
+
+    public boolean isWithinDistance(float distance, BaseActor other){
+        Polygon poly1 = this.getBoundaryPolygon();
+        float scaleX = (this.getWidth() + 2* distance)/this.getWidth();
+        float scaleY = (this.getHeight() + 2 * distance) / this.getHeight();
+        poly1. setScale(scaleX, scaleY);
+
+        Polygon poly2 = other.getBoundaryPolygon();
+
+        if(!poly1.getBoundingRectangle().overlaps(poly2.getBoundingRectangle())){
+            return false;
+        }
+
+        return Intersector.overlapConvexPolygons(poly1, poly2);
     }
 }
