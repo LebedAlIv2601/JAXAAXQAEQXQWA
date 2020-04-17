@@ -22,7 +22,7 @@ public class Turtle extends BaseActor{
         String[] fileNamesForHit = {"1.png","2.png", "3.png", "4.png", "5.png"};
 
         walk = loadAnimationFromFiles(fileNamesForWalk, 0.1f, true);
-        hit = loadAnimationFromFiles(fileNamesForHit, 2f, false);
+        hit = loadAnimationFromFiles(fileNamesForHit, 0.1f, true);
 
         at = false;
 
@@ -54,6 +54,7 @@ public class Turtle extends BaseActor{
 
 
         if(isHitting()){
+
             setAnimation(hit);
 
             if(isAnimationFinished()){
@@ -62,7 +63,8 @@ public class Turtle extends BaseActor{
         } else if (!isMoving()) {
             setAnimation(stand);
         } else {
-            setAnimation(walk);
+
+            setAnimation(hit);
         }
 
 

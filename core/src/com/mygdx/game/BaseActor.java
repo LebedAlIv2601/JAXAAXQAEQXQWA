@@ -60,6 +60,7 @@ public class BaseActor extends Group {
         }
     }
 
+
     public void setAnimationPaused(boolean pause){
         animationPaused = pause;
     }
